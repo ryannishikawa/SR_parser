@@ -101,7 +101,7 @@ const vector<string> symbols = {
 //list of error statements
 const vector<string> errors = {
     "Invalid input",
-    "Invalid input"
+    "Invalid token"
 };
 
 // function to check if a character is a symbol
@@ -113,10 +113,12 @@ bool isSymbol(char c) {
 //func to print out a stack
 template <typename T>
 void printStack(stack<T> s) {
+    cout << '\n';
     while (!s.empty()) {
-        cout << s.top() << " ";
+        cout << s.top();
         s.pop();
     }
+    cout << '\n';
 };
 
 //func to parse token stream
@@ -124,10 +126,13 @@ stack<string> parse(const string& tokens) {
     stack<string> s;
     string now = "";
     s.push("$");
-    for (int i = tokens.size(); i > 0; i--) {
-        now += tokens[i];
-        if (isSymbol(tokens[i])) { s.push(now); now.clear(); }
-        else if (now == "id") { s.push(now); now.clear(); }
+    for (int i = tokens.size() - 1; i >= 0; i--) {
+        if (!iswspace(tokens[i])) {
+            now += tokens[i];
+            if (isSymbol(tokens[i])) { s.push(now); now.clear(); }
+            else if (now == "di") { s.push("id"); now.clear(); }
+            else if (now.length() >= 3) { cerr << errors[1] << endl; return {}; }
+        }
     }
 
     return s;
@@ -136,11 +141,11 @@ stack<string> parse(const string& tokens) {
 int main() {
     string tokens;
     cout << "\nInput token stream: ";
-    cin >> tokens;
-    
-    cout << "\n\n" << "|" << setw(20) << left << "Stack" << "|" << setw(20) << left << "Input" << "|" << setw(20) << left << "Action\n";
+    getline(cin, tokens);
+    stack<string> test = parse(tokens);
+    //cout << "\n\n" << "|" << setw(20) << left << "Stack" << "|" << setw(20) << left << "Input" << "|" << setw(20) << left << "Action\n";
 
-    
+    printStack(test);    
 
     return 0;
 }

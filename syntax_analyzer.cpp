@@ -109,7 +109,7 @@ bool isSymbol(char c) {
 
 //func to print line of parse
 void printLine(string in, string stack, int state, string act) {
-    cout << "\n" << "|" << setw(20) << left << stack << "|" << setw(20) << left << state << "|" << setw(20) << left << in << "|" << setw(20) << left << act << "\n";
+    cout << "\n|" << setw(20) << left << stack << "|" << setw(20) << left << state << "|" << setw(20) << left << in << "|" << setw(20) << left << act;
 }
 
 //func to convert stack to string
@@ -185,8 +185,8 @@ int main() {
             in.pop();
             sStack.push(action.second);
         } else if (action.first == "R") { //reduce
-            act = "Reduce ";
-            act += rules[action.second - 1].first + " -> " + rules[action.second - 1].second;
+            act = "Reduce by ";
+            act += rules[action.second - 1].first + "->" + rules[action.second - 1].second;
             printLine(i, s, sStack.top(), act);
             for (int i = 0; i < rules[action.second - 1].second.length(); i++) {
                 match.pop();
@@ -194,19 +194,19 @@ int main() {
             }
             match.push(rules[action.second - 1].first);
             go = true;
-        } else if (action.first == "G"){
+        } else if (action.first == "G"){ //goto
             sStack.push(action.second);
-        } else if (action.first == "E") {
+        } else if (action.first == "E") { //error
             act = "Error";
             printLine(i, s, sStack.top(), errors[action.second]);
             return 0;
-        } else if (action.first == "A") {
+        } else if (action.first == "A") { //accept
             act = "Accept";
             printLine(i, s, sStack.top(), act);
             break;
         }
     }
-    cout << endl;
+    cout << "\n\n";
 
     return 0;
 }

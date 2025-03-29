@@ -44,6 +44,8 @@
 //
 //References for this file
 //   https://www.geeksforgeeks.org/setw-function-in-cpp-with-examples/
+//   https://en.cppreference.com/w/cpp/container/stack
+//   https://www.geeksforgeeks.org/shift-reduce-parser-compiler/
 //
 //=======1=========2=========3=========4=========5=========6=========7=========8=========9=========0=========1=========2**
 //
@@ -57,7 +59,6 @@
 #include <string>
 #include <cctype>
 #include <stack>
-#include <variant>
 
 using namespace std;
 

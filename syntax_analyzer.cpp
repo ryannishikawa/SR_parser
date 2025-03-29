@@ -57,6 +57,7 @@
 #include <string>
 #include <cctype>
 #include <stack>
+#include <variant>
 
 using namespace std;
 
@@ -82,26 +83,21 @@ const pair<string, int> SR_table[17][11] = {
 
 //list of grammar rules
 const pair<string, string> rules[8] = {
-    {"E", "E + T"},  //1
-    {"E", "E - T"},  //2
-    {"E", "T"},      //3
-    {"T", "T * F"},  //4
-    {"T", "T / F"},  //5
-    {"T", "F"},      //6
-    {"F", "( E )"},  //7
-    {"F", "id"}      //8
-};
-
-// list of symbols including multi-character operators
-const vector<string> symbols = {
-    "(", ")", "[", "]", "{", "}", ".", "+", "-", "*", "/", "%", "<", ">", "=", ";", ",",
-    "++", "--", "<=", ">=", "==", "&&", "||", "!", "&", "|"
+    {"E", "E+T"},  //1
+    {"E", "E-T"},  //2
+    {"E", "T"},    //3
+    {"T", "T*F"},  //4
+    {"T", "T/F"},  //5
+    {"T", "F"},    //6
+    {"F", "(E)"},  //7
+    {"F", "i"}     //8
 };
 
 //list of error statements
 const vector<string> errors = {
     "Invalid input",
-    "Invalid token"
+    "Invalid token",
+    "Seems like something is wrong"
 };
 
 // function to check if a character is a symbol
@@ -110,15 +106,20 @@ bool isSymbol(char c) {
     return symbolChars.find(c) != string::npos;
 }
 
-//func to print out a stack
+//func to print line of parse
+void printLine(string in, string stack, int state, string act) {
+    cout << "\n" << "|" << setw(20) << left << stack << "|" << setw(20) << left << state << "|" << setw(20) << left << in << "|" << setw(20) << left << act << "\n";
+}
+
+//func to convert stack to string
 template <typename T>
-void printStack(stack<T> s) {
-    cout << '\n';
+string stack2str(stack<T> s) {
+    string str = "";
     while (!s.empty()) {
-        cout << s.top();
+        str += s.top();
         s.pop();
     }
-    cout << '\n';
+    return str;
 };
 
 //func to parse token stream
@@ -138,14 +139,73 @@ stack<string> parse(const string& tokens) {
     return s;
 }
 
+
 int main() {
     string tokens;
     cout << "\nInput token stream: ";
     getline(cin, tokens);
-    stack<string> test = parse(tokens);
-    //cout << "\n\n" << "|" << setw(20) << left << "Stack" << "|" << setw(20) << left << "Input" << "|" << setw(20) << left << "Action\n";
 
-    printStack(test);    
+    //init stacks and stuff for parsing
+    bool go = false;
+    stack<string> in = parse(tokens);
+    stack<int> sStack;
+    sStack.push(0);
+    stack<string> match;
+    match.push("$");
+    pair<string, int> action;
+    string act = "";
+
+    cout << "\n\n" << "|" << setw(20) << left << "Stack" << "|" << setw(20) << left << "State" << "|" << setw(20) << left << "Input" << "|" << setw(20) << left << "Action\n";
+
+    while(act != "Accept" && act != "Error") {
+        string i = stack2str(in);
+        string s = stack2str(match);
+        if (!go) {
+            for (int i = 0; i < sizeof(SR_table[0]); i++) {
+                if (in.top() == SR_table[0][i].first) { 
+                    action = SR_table[sStack.top() + 1][i];
+                    break;
+                }
+            }
+        } else if (go) {
+            for (int i = 0; i < sizeof(SR_table[0]); i++) {
+                if (match.top() == SR_table[0][i].first) { 
+                    action = SR_table[sStack.top() + 1][i];
+                    go = false;
+                    break;
+                }
+            }
+        }
+        //shift
+        if (action.first == "S") {
+            act = "Shift";
+            printLine(i, s, sStack.top(), act);
+            match.push(in.top());
+            in.pop();
+            sStack.push(action.second);
+        } else if (action.first == "R") { //reduce
+            act = "Reduce ";
+            act += rules[action.second - 1].first + " -> " + rules[action.second - 1].second;
+            printLine(i, s, sStack.top(), act);
+            for (int i = 0; i < rules[action.second - 1].second.length(); i++) {
+                match.pop();
+                sStack.pop();
+            }
+            match.push(rules[action.second - 1].first);
+            go = true;
+        } else if (action.first == "G"){
+            sStack.push(action.second);
+        } else if (action.first == "E") {
+            act = "Error";
+            printLine(i, s, sStack.top(), errors[action.second]);
+            return 0;
+        } else if (action.first == "A") {
+            act = "Accept";
+            printLine(i, s, sStack.top(), act);
+            break;
+        }
+    }
+    cout << endl;
 
     return 0;
 }

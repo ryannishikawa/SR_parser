@@ -43,7 +43,7 @@
 //      if running for the first time, do "chmod +x r.sh" to give the script permission to execute
 //
 //References for this file
-//   https://www.geeksforgeeks.org/setw-function-in-cpp-with-examples/
+//   https://www.geeksforgeeks.org/setw-f3nction-in-cpp-with-examples/
 //   https://en.cppreference.com/w/cpp/container/stack
 //   https://www.geeksforgeeks.org/shift-reduce-parser-compiler/
 //
@@ -109,7 +109,7 @@ bool isSymbol(char c) {
 
 //func to print line of parse
 void printLine(string in, string stack, int state, string act) {
-    cout << "\n|" << setw(20) << left << stack << "|" << setw(20) << left << state << "|" << setw(20) << left << in << "|" << setw(20) << left << act;
+    cout << "\n|" << setw(23) << left << stack << "|" << setw(23) << left << in << "|" << setw(23) << left << act << "|" << setw(23) << left << state;
 }
 
 //func to convert stack to string
@@ -118,6 +118,16 @@ string stack2str(stack<T> s) {
     string str = "";
     while (!s.empty()) {
         str += s.top();
+        s.pop();
+    }
+    return str;
+};
+
+template <typename T>
+string stack2str2(stack<T> s) {
+    string str = "";
+    while (!s.empty()) {
+        str = s.top() + str;
         s.pop();
     }
     return str;
@@ -156,11 +166,11 @@ int main() {
     pair<string, int> action;
     string act = "";
 
-    cout << "\n\n" << "|" << setw(20) << left << "Stack" << "|" << setw(20) << left << "State" << "|" << setw(20) << left << "Input" << "|" << setw(20) << left << "Action\n";
+    cout << "\n\n" << "|" << setw(23) << left << "Stack" << "|" << setw(23) << left << "Input" << "|" << setw(23) << left << "Action" << "|" << setw(23) << left << "State\n";
 
     while(act != "Accept" && act != "Error") {
         string i = stack2str(in);
-        string s = stack2str(match);
+        string s = stack2str2(match);
         if (!go) {
             for (int i = 0; i < sizeof(SR_table[0]); i++) {
                 if (in.top() == SR_table[0][i].first) { 
@@ -199,7 +209,7 @@ int main() {
         } else if (action.first == "E") { //error
             act = "Error";
             printLine(i, s, sStack.top(), errors[action.second]);
-            return 0;
+            break;
         } else if (action.first == "A") { //accept
             act = "Accept";
             printLine(i, s, sStack.top(), act);
